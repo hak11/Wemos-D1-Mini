@@ -1,0 +1,94 @@
+#include <ESP8266WiFi.h>
+ 
+int buzzer = D4;
+int inputInfrared = D2;
+int kondisi = HIGH;
+String apiKey = "***************"; //sesuaikan dengan key kalian
+const char* ssid = "***************"; //sesuaikan dengan ssid wifi kalian
+const char* password = "****************"; //sesuaikan dengan wifi password kalian
+const char* server = "api.thingspeak.com";
+ 
+String postStr = apiKey;
+WiFiClient client;
+ 
+void setup() {
+  Serial.begin(115200);
+  delay(10);
+  pinMode(buzzer, OUTPUT);
+  pinMode(inputInfrared, INPUT);
+ 
+  WiFi.begin(ssid, password);
+   
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+   
+  WiFi.begin(ssid, password);
+   
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(200);
+    Serial.print(".");
+  }
+    Serial.println("");
+    Serial.println("WiFi connected");
+  }
+ 
+ 
+void beep(unsigned char delayms){
+  analogWrite(buzzer, 50); // 1-255
+  delay(delayms);
+  analogWrite(buzzer, 0);
+  delay(delayms);
+}
+ 
+ 
+void loop()
+{
+ 
+kondisi = digitalRead(inputInfrared);
+ 
+if (client.connect(server,80)) {
+  if(kondisi == LOW){
+    Serial.println("Ada orang nih bro");
+    postStr +="&field1=1";  
+  } else {
+    Serial.println("Aman Tenang");
+    postStr +="&field1=0";
+  }
+ 
+  //KIRIM
+ 
+    client.print("POST /update HTTP/1.1\n");
+    client.print("Host: api.thingspeak.com\n");
+    client.print("Connection: close\n");
+    client.print("X-THINGSPEAKAPIKEY: "+apiKey+"\n");
+    client.print("Content-Type: application/x-www-form-urlencoded\n");
+    client.print("Content-Length: ");
+    client.print(postStr.length());
+    client.print("\n\n");
+    client.print(postStr);
+     
+    Serial.println("\nMengirim Data Thingspeak\n");
+   
+    client.stop();
+     
+    Serial.println("Loading...\n");
+    if(kondisi == LOW){
+      beep(100);
+      beep(100);
+      beep(100);
+      beep(100);
+      beep(100);
+      beep(100);
+      beep(100);
+      beep(100);
+      beep(100);
+      beep(100);
+      delay(4000);
+    } else {
+      delay(5000);
+    }
+}
+}
