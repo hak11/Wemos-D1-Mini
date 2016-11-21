@@ -54,7 +54,7 @@ postStr +=&field1=;
 postStr += String(temperatur);
 postStr +=&field2=;
 postStr += String(kelembapan);
-postStr += rnrn;
+postStr += \r\n\r\n;
  
 client.print(POST update HTTP1.1n);
 client.print(Host api.thingspeak.comn);
